@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:hackathon_rower/screens/main/screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() {
@@ -14,10 +15,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const LocationScreen(),
+      home: const MainScreen(),
       theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
+          colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.green,
+      )),
     );
   }
 }
@@ -53,9 +55,11 @@ class _LocationScreenState extends State<LocationScreen> {
     }
   }
 
-  Future<String?> getAddressFromLatLng(double latitude, double longitude) async {
+  Future<String?> getAddressFromLatLng(
+      double latitude, double longitude) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
         Placemark placemark = placemarks.first;
         return '${placemark.locality}, ${placemark.country}';
@@ -69,25 +73,24 @@ class _LocationScreenState extends State<LocationScreen> {
   Future<void> _setMarker() async {
     if (!_isLocationSelected) {
       final LatLngBounds bounds = await mapController.getVisibleRegion();
-          final LatLng center = LatLng(
-            (bounds.northeast.latitude + bounds.southwest.latitude) / 2 + 0.003,
-            (bounds.northeast.longitude + bounds.southwest.longitude) / 2
-          );
+      final LatLng center = LatLng(
+          (bounds.northeast.latitude + bounds.southwest.latitude) / 2 + 0.003,
+          (bounds.northeast.longitude + bounds.southwest.longitude) / 2);
 
-
-      print('Współrzędne: (${center.latitude}, ${center.longitude})'); 
+      print('Współrzędne: (${center.latitude}, ${center.longitude})');
 
       setState(() {
         _markerPosition = center;
         _isLocationSelected = true;
       });
 
-      _selectedLocationAddress = await getAddressFromLatLng(center.latitude, center.longitude);
+      _selectedLocationAddress =
+          await getAddressFromLatLng(center.latitude, center.longitude);
     } else {
       setState(() {
         _markerPosition = null;
         _isLocationSelected = false;
-        _selectedLocationAddress = null; 
+        _selectedLocationAddress = null;
       });
     }
   }
@@ -108,7 +111,8 @@ class _LocationScreenState extends State<LocationScreen> {
                     Marker(
                       markerId: const MarkerId('selected-location'),
                       position: _markerPosition!,
-                      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+                      icon: BitmapDescriptor.defaultMarkerWithHue(
+                          BitmapDescriptor.hueGreen),
                     ),
                   }
                 : {},
@@ -213,7 +217,9 @@ class _LocationScreenState extends State<LocationScreen> {
                         child: ElevatedButton(
                           onPressed: _setMarker,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _isLocationSelected ? Colors.green[800] : Colors.green,
+                            backgroundColor: _isLocationSelected
+                                ? Colors.green[800]
+                                : Colors.green,
                             padding: const EdgeInsets.symmetric(vertical: 20),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -221,7 +227,8 @@ class _LocationScreenState extends State<LocationScreen> {
                           ),
                           child: Text(
                             _isLocationSelected ? 'Anuluj' : 'Wybierz',
-                            style: GoogleFonts.lato(fontSize: 24, color: Colors.white),
+                            style: GoogleFonts.lato(
+                                fontSize: 24, color: Colors.white),
                           ),
                         ),
                       ),
@@ -239,7 +246,8 @@ class _LocationScreenState extends State<LocationScreen> {
                           ),
                           child: Text(
                             'Zatwierdź',
-                            style: GoogleFonts.lato(fontSize: 24, color: Colors.white),
+                            style: GoogleFonts.lato(
+                                fontSize: 24, color: Colors.white),
                           ),
                         ),
                       ),
@@ -275,7 +283,8 @@ class RoundedClipperDown extends CustomClipper<Path> {
     path.lineTo(0, size.height - 30);
     path.quadraticBezierTo(0, size.height, 30, size.height);
     path.lineTo(size.width - 30, size.height);
-    path.quadraticBezierTo(size.width, size.height, size.width, size.height - 30);
+    path.quadraticBezierTo(
+        size.width, size.height, size.width, size.height - 30);
     path.lineTo(size.width, 0);
     path.close();
     return path;
