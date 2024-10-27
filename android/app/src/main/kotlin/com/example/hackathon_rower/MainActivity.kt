@@ -1,3 +1,4 @@
+package com.example.hackathon_rower
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugins.GeneratedPluginRegistrant
@@ -9,7 +10,5 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         GeneratedPluginRegistrant.registerWith(flutterEngine)
-
-        val apiKey = BuildConfig.GOOGLE_MAPS_API_KEY  
     }
 }
