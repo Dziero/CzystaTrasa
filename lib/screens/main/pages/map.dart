@@ -13,16 +13,17 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
 
   CameraPosition _initialCameraPosition = const CameraPosition(
     target: LatLng(52.22977, 21.01178),
-    zoom: 14.4746, 
+    zoom: 14.4746,
   );
 
   final location.Location _location = location.Location();
-  String _currentLocationText = "Nieznaleziono lokalizacji";
-
+  String _currentLocationText = "Włącz lokalizacje";
+  bool _isLocationGranted = false;
   @override
   void initState() {
     super.initState();
@@ -30,12 +31,13 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> _requestLocationPermission() async {
-    final status = await Permission.location.status;
-    if (status.isDenied) {
-      await Permission.location.request();
-    }
     if (await Permission.location.isGranted) {
       _setCurrentLocation();
+    } else {
+      PermissionStatus status = await Permission.location.request();
+      if (status.isGranted) {
+        _setCurrentLocation();
+      }
     }
   }
 
@@ -43,15 +45,17 @@ class _MapPageState extends State<MapPage> {
     _location.changeSettings(accuracy: location.LocationAccuracy.low);
 
     final currentLocation = await _location.getLocation();
-    List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(
+    List<geocoding.Placemark> placemarks =
+        await geocoding.placemarkFromCoordinates(
       currentLocation.latitude!,
       currentLocation.longitude!,
     );
 
     setState(() {
+      _isLocationGranted = true;
       _initialCameraPosition = CameraPosition(
         target: LatLng(currentLocation.latitude!, currentLocation.longitude!),
-        zoom: 14.4746, 
+        zoom: 14.4746,
       );
 
       geocoding.Placemark place = placemarks[0];
@@ -59,7 +63,8 @@ class _MapPageState extends State<MapPage> {
     });
 
     final controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(_initialCameraPosition));
+    controller
+        .animateCamera(CameraUpdate.newCameraPosition(_initialCameraPosition));
   }
 
   @override
@@ -73,8 +78,8 @@ class _MapPageState extends State<MapPage> {
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
             },
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
+            myLocationEnabled: _isLocationGranted,
+            myLocationButtonEnabled: _isLocationGranted,
           ),
         ),
         Padding(
