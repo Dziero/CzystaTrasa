@@ -34,7 +34,7 @@ class _MapPageState extends State<MapPage> {
   bool _isLocationGranted = false;
 
   List<LatLng> _routePoints = [];
-  final String _apiKey = "AIzaSyDBlqel5LnkU8AxK5qKe_gqgDaBLvJAeMs"; 
+  final String _apiKey = "API KEY"; 
 
   @override
   void initState() {
