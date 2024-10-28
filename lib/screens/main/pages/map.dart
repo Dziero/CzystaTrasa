@@ -5,6 +5,12 @@ import 'package:hackathon_rower/util/location.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:location/location.dart' as location;
 
+class RouteSelectionData {
+  String currentLocationText = "";
+  String destinationLocationText = "";
+  LatLng? destinationCoordinates;
+}
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -23,8 +29,7 @@ class _MapPageState extends State<MapPage> {
 
   final location.Location _location = location.Location();
 
-  String _currentLocationText = "";
-  String _destinationLocationText = "";
+  final RouteSelectionData _routeSelectionData = RouteSelectionData();
   bool _isLocationGranted = false;
 
   @override
@@ -57,7 +62,7 @@ class _MapPageState extends State<MapPage> {
         zoom: 14.4746,
       );
 
-      _currentLocationText = locationName;
+      _routeSelectionData.currentLocationText = locationName;
     });
 
     final controller = await _controller.future;
@@ -69,7 +74,8 @@ class _MapPageState extends State<MapPage> {
     String locationName = await getLocationFromCoordinates(coordinates);
 
     setState(() {
-      _destinationLocationText = locationName;
+      _routeSelectionData.destinationLocationText = locationName;
+      _routeSelectionData.destinationCoordinates = coordinates;
     });
   }
 
@@ -87,7 +93,13 @@ class _MapPageState extends State<MapPage> {
             myLocationEnabled: _isLocationGranted,
             myLocationButtonEnabled: _isLocationGranted,
             onTap: _setDestinationLocation,
-            markers: const {},
+            markers: _routeSelectionData.destinationCoordinates != null
+                ? {
+                    Marker(
+                        markerId: const MarkerId('destination'),
+                        position: _routeSelectionData.destinationCoordinates!)
+                  }
+                : {},
           ),
         ),
         Padding(
@@ -102,13 +114,13 @@ class _MapPageState extends State<MapPage> {
               Row(children: [
                 const Icon(Icons.location_on),
                 const SizedBox(width: 4),
-                Text(_currentLocationText),
+                Text(_routeSelectionData.currentLocationText),
               ]),
               const SizedBox(height: 16),
               Row(children: [
                 const Icon(Icons.flag),
                 const SizedBox(width: 4),
-                Text(_destinationLocationText),
+                Text(_routeSelectionData.destinationLocationText),
               ]),
               const SizedBox(height: 16),
               const Align(
