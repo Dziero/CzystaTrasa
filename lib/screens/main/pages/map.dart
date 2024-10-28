@@ -1,8 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:geocoding/geocoding.dart' as geocoding;
+import 'package:location/location.dart' as location;
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -12,13 +13,54 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
 
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
+  CameraPosition _initialCameraPosition = const CameraPosition(
+    target: LatLng(52.22977, 21.01178),
+    zoom: 14.4746, 
   );
+
+  final location.Location _location = location.Location();
+  String _currentLocationText = "Nieznaleziono lokalizacji";
+
+  @override
+  void initState() {
+    super.initState();
+    _requestLocationPermission();
+  }
+
+  Future<void> _requestLocationPermission() async {
+    final status = await Permission.location.status;
+    if (status.isDenied) {
+      await Permission.location.request();
+    }
+    if (await Permission.location.isGranted) {
+      _setCurrentLocation();
+    }
+  }
+
+  Future<void> _setCurrentLocation() async {
+    _location.changeSettings(accuracy: location.LocationAccuracy.low);
+
+    final currentLocation = await _location.getLocation();
+    List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(
+      currentLocation.latitude!,
+      currentLocation.longitude!,
+    );
+
+    setState(() {
+      _initialCameraPosition = CameraPosition(
+        target: LatLng(currentLocation.latitude!, currentLocation.longitude!),
+        zoom: 14.4746, 
+      );
+
+      geocoding.Placemark place = placemarks[0];
+      _currentLocationText = "${place.street}, ${place.locality}";
+    });
+
+    final controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(_initialCameraPosition));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,47 +69,45 @@ class _MapPageState extends State<MapPage> {
         Expanded(
           child: GoogleMap(
             mapType: MapType.normal,
-            initialCameraPosition: _kGooglePlex,
+            initialCameraPosition: _initialCameraPosition,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
             },
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.all(16),
+        Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Text(
+              const Text(
                 "Planowanie trasy",
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(children: [
-                Icon(Icons.location_on),
-                SizedBox(width: 4),
-                Text(
-                  "Lokalizacja początkowa: Twoja lokalizacja",
-                )
+                const Icon(Icons.location_on),
+                const SizedBox(width: 4),
+                Text(_currentLocationText),
               ]),
-              SizedBox(height: 16),
-              Row(children: [
+              const SizedBox(height: 16),
+              const Row(children: [
                 Icon(Icons.flag),
                 SizedBox(width: 4),
-                Text(
-                  "Lokalizacja końcowa: Puta Barca",
-                )
+                Text("Lokalizacja końcowa: Puta Barca"),
               ]),
-              SizedBox(height: 16),
-              Align(
+              const SizedBox(height: 16),
+              const Align(
                 alignment: Alignment.bottomRight,
                 child: FilledButton(
                   onPressed: null,
                   child: Text("Rozpocznij"),
                 ),
-              )
+              ),
             ],
           ),
-        )
+        ),
       ],
     );
   }
