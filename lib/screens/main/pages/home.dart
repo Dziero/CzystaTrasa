@@ -115,7 +115,7 @@ class HomePage extends StatelessWidget {
         children: [
           const SizedBox(height: 32),
           const Text(
-            "Ostatni przejazd",
+            "Twoje statystyki",
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
