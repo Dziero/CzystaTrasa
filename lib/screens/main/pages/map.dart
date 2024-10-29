@@ -112,6 +112,7 @@ class _MapPageState extends State<MapPage> {
             myLocationEnabled: _isLocationGranted,
             myLocationButtonEnabled: _isLocationGranted,
             onTap: _setDestinationLocation,
+            mapToolbarEnabled: false,
             markers: _routeSelectionData.destinationCoordinates != null
                 ? {
                     Marker(
