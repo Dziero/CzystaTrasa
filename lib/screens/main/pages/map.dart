@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hackathon_rower/util/location.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -22,7 +23,8 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
 
   CameraPosition _initialCameraPosition = const CameraPosition(
     target: LatLng(52.22977, 21.01178),
@@ -34,7 +36,7 @@ class _MapPageState extends State<MapPage> {
   bool _isLocationGranted = false;
 
   List<LatLng> _routePoints = [];
-  final String _apiKey = "API KEY"; 
+  final String _apiKey = dotenv.env["GOOGLE_MAPS_API_KEY"]!;
 
   @override
   void initState() {
@@ -101,10 +103,9 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<List<LatLng>?> _fetchRoute(LatLng origin, LatLng destination) async {
-final url = Uri.parse(
-  'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=bicycling&avoid=tolls|highways|ferries&alternatives=true&key=$_apiKey',
-);
-
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=bicycling&avoid=tolls|highways|ferries&alternatives=true&key=$_apiKey',
+    );
 
     final response = await http.get(url);
     print("Response: ${response.statusCode}"); // Debug API Google
