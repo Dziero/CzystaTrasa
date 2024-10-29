@@ -115,7 +115,7 @@ class HomePage extends StatelessWidget {
         children: [
           const SizedBox(height: 32),
           const Text(
-            "Statystyki",
+            "Ostatni przejazd",
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -126,6 +126,8 @@ class HomePage extends StatelessWidget {
               children: [
                 Column(
                   children: [
+                    Icon(Icons.directions_bike,
+                        color: Theme.of(context).primaryColor),
                     Text("13,7",
                         style: TextStyle(
                             fontSize: 18,
@@ -136,6 +138,8 @@ class HomePage extends StatelessWidget {
                 ),
                 Column(
                   children: [
+                    Icon(Icons.local_fire_department,
+                        color: Theme.of(context).primaryColor),
                     Text("6 832",
                         style: TextStyle(
                             fontSize: 18,
