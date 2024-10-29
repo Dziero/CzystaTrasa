@@ -10,6 +10,7 @@ class RouteSelectionData {
   String destinationLocationText = "";
   LatLng? currentCoordinates;
   LatLng? destinationCoordinates;
+  List<LatLng> routePoints = [];
 }
 
 class MapPage extends StatefulWidget {
@@ -31,8 +32,6 @@ class _MapPageState extends State<MapPage> {
   final location.Location _location = location.Location();
   final RouteSelectionData _routeSelectionData = RouteSelectionData();
   bool _isLocationGranted = false;
-
-  List<LatLng> _routePoints = [];
 
   @override
   void initState() {
@@ -81,6 +80,7 @@ class _MapPageState extends State<MapPage> {
       _routeSelectionData.destinationLocationText = locationName;
       _routeSelectionData.destinationCoordinates = coordinates;
     });
+    _drawRoute();
   }
 
   Future<void> _drawRoute() async {
@@ -94,7 +94,7 @@ class _MapPageState extends State<MapPage> {
     if (route == null) return;
 
     setState(() {
-      _routePoints = route;
+      _routeSelectionData.routePoints = route;
     });
   }
 
@@ -119,13 +119,13 @@ class _MapPageState extends State<MapPage> {
                         position: _routeSelectionData.destinationCoordinates!)
                   }
                 : {},
-            polylines: _routePoints.isNotEmpty
+            polylines: _routeSelectionData.routePoints.isNotEmpty
                 ? {
                     Polyline(
                       polylineId: const PolylineId('route'),
                       color: Colors.green,
                       width: 5,
-                      points: _routePoints,
+                      points: _routeSelectionData.routePoints,
                     )
                   }
                 : {},
@@ -153,12 +153,8 @@ class _MapPageState extends State<MapPage> {
               ]),
               const SizedBox(height: 16),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  FilledButton(
-                    onPressed: _drawRoute,
-                    child: const Text("Wyznacz trasę"),
-                  ),
                   FilledButton(
                     onPressed: () {
                       print("Akcja rozpocznij");
