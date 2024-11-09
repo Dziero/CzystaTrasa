@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hackathon_rower/components/stats_section.dart';
 
 class BikeTrip {
   final TimeOfDay startTime;
@@ -110,75 +111,63 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          const SizedBox(height: 32),
-          const Text(
-            "Twoje statystyki",
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 60),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Icon(Icons.directions_bike,
-                        color: Theme.of(context).primaryColor),
-                    Text("13,7",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor)),
-                    const Text("km")
-                  ],
-                ),
-                Column(
-                  children: [
-                    Icon(Icons.local_fire_department,
-                        color: Theme.of(context).primaryColor),
-                    Text("6 832",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor)),
-                    const Text("kcal")
-                  ],
-                ),
-              ],
+    return SingleChildScrollView(
+        child: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const SizedBox(height: 32),
+            const Text(
+              "Twoje statystyki",
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Row(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
+            const SizedBox(height: 16),
+            const StatsSection(),
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Text(
                   "Dziennik",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                 ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: const Icon(Icons.directions_bike),
-                    title: Text(
-                        "${bikeRides[index].startTime.hour}:${bikeRides[index].startTime.minute} - ${bikeRides[index].endTime.hour}:${bikeRides[index].endTime.minute}"),
-                    subtitle: Text(
-                        "${bikeRides[index].startLocation} - ${bikeRides[index].endLocation}"),
-                  );
-                },
-                itemCount: bikeRides.length),
-          )
-        ],
+              ],
+            ),
+            ...bikeRides.map((trip) => SizedBox(
+                width: double.infinity,
+                child: Card.outlined(
+                    child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.local_fire_department_outlined),
+                        SizedBox(width: 6),
+                        Text("1234 kcal")
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.schedule),
+                        const SizedBox(width: 6),
+                        Text(
+                            '${trip.startTime.hour.toString()}:${trip.startTime.minute.toString().padLeft(2, '0')} - ${trip.endTime.hour.toString()}:${trip.endTime.minute.toString().padLeft(2, '0')}')
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined),
+                        const SizedBox(width: 6),
+                        Text("${trip.startLocation} - ${trip.endLocation}")
+                      ],
+                    )
+                  ]),
+                ))))
+          ],
+        ),
       ),
-    );
+    ));
   }
 }
