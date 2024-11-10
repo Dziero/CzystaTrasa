@@ -36,7 +36,7 @@ class _MapPageState extends State<MapPage> {
   bool _isRideActive = false;
   Timer? _timer;
   int _secondsElapsed = 0;
-  List<LatLng> _rideRoutePoints = [];
+  final List<LatLng> _rideRoutePoints = [];
 
   @override
   void initState() {
@@ -204,23 +204,32 @@ class _MapPageState extends State<MapPage> {
                   Text(_routeSelectionData.destinationLocationText),
                 ],
               ),
-              if (_isRideActive)
-                Padding(
+              Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    "Czas przejazdu: ${_secondsElapsed ~/ 60} min ${_secondsElapsed % 60} sek",
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                  child: _isRideActive
+                      ? Text(
+                          "Czas przejazdu: ${_secondsElapsed ~/ 60} min ${_secondsElapsed % 60} sek",
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        )
+                      : const Text(
+                          "",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        )),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  FilledButton(
-                    onPressed: _isRideActive ? _stopRide : _startRide,
-                    child: Text(_isRideActive ? "Zakończ" : "Rozpocznij"),
-                  ),
+                  _isRideActive
+                      ? OutlinedButton(
+                          onPressed: _stopRide,
+                          child: const Text("Zakończ"),
+                        )
+                      : FilledButton(
+                          onPressed: _startRide,
+                          child: const Text("Rozpocznij"),
+                        )
                 ],
               ),
             ],
