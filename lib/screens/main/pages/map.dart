@@ -31,7 +31,12 @@ class _MapPageState extends State<MapPage> {
 
   final location.Location _location = location.Location();
   final RouteSelectionData _routeSelectionData = RouteSelectionData();
+
   bool _isLocationGranted = false;
+  bool _isRideActive = false;
+  Timer? _timer;
+  int _secondsElapsed = 0;
+  List<LatLng> _rideRoutePoints = [];
 
   @override
   void initState() {
@@ -98,6 +103,42 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  void _startRide() {
+    setState(() {
+      _isRideActive = true;
+      _secondsElapsed = 0;
+      _rideRoutePoints.clear();
+    });
+
+    // Śledzenie lokalizacji podczas przejazdu
+    _location.onLocationChanged.listen((locationData) async {
+      if (!_isRideActive) return;
+
+      final newPoint = LatLng(locationData.latitude!, locationData.longitude!);
+      setState(() {
+        _rideRoutePoints.add(newPoint);
+      });
+
+      // Aktualizacja kamery, aby śledzić aktualną pozycję
+      final controller = await _controller.future;
+      controller.animateCamera(CameraUpdate.newLatLng(newPoint));
+    });
+
+    // Uruchomienie licznika czasu przejazdu
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _secondsElapsed++;
+      });
+    });
+  }
+
+  void _stopRide() {
+    setState(() {
+      _isRideActive = false;
+    });
+    _timer?.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -120,47 +161,65 @@ class _MapPageState extends State<MapPage> {
                         position: _routeSelectionData.destinationCoordinates!)
                   }
                 : {},
-            polylines: _routeSelectionData.routePoints.isNotEmpty
-                ? {
-                    Polyline(
-                      polylineId: const PolylineId('route'),
-                      color: Colors.green,
-                      width: 5,
-                      points: _routeSelectionData.routePoints,
-                    )
-                  }
-                : {},
+            polylines: {
+              if (_routeSelectionData.routePoints.isNotEmpty)
+                Polyline(
+                  polylineId: const PolylineId('route'),
+                  color: Colors.green,
+                  width: 5,
+                  points: _routeSelectionData.routePoints,
+                ),
+              if (_rideRoutePoints.isNotEmpty)
+                Polyline(
+                  polylineId: const PolylineId('ride'),
+                  color: Colors.blue,
+                  width: 5,
+                  points: _rideRoutePoints,
+                ),
+            },
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 "Planowanie trasy",
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Row(children: [
-                const Icon(Icons.location_on),
-                const SizedBox(width: 4),
-                Text(_routeSelectionData.currentLocationText),
-              ]),
+              Row(
+                children: [
+                  const Icon(Icons.location_on),
+                  const SizedBox(width: 4),
+                  Text(_routeSelectionData.currentLocationText),
+                ],
+              ),
               const SizedBox(height: 16),
-              Row(children: [
-                const Icon(Icons.flag),
-                const SizedBox(width: 4),
-                Text(_routeSelectionData.destinationLocationText),
-              ]),
+              Row(
+                children: [
+                  const Icon(Icons.flag),
+                  const SizedBox(width: 4),
+                  Text(_routeSelectionData.destinationLocationText),
+                ],
+              ),
+              if (_isRideActive)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    "Czas przejazdu: ${_secondsElapsed ~/ 60} min ${_secondsElapsed % 60} sek",
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   FilledButton(
-                    onPressed: () {
-                      print("Akcja rozpocznij");
-                    },
-                    child: const Text("Rozpocznij"),
+                    onPressed: _isRideActive ? _stopRide : _startRide,
+                    child: Text(_isRideActive ? "Zakończ" : "Rozpocznij"),
                   ),
                 ],
               ),

@@ -143,7 +143,7 @@ class HomePage extends StatelessWidget {
                       children: [
                         Icon(Icons.local_fire_department_outlined),
                         SizedBox(width: 6),
-                        Text("1234 kcal")
+                        Text("0 kcal")
                       ],
                     ),
                     const SizedBox(height: 6),
